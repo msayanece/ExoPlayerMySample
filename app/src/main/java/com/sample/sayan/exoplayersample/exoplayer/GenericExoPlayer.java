@@ -12,6 +12,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
@@ -25,6 +26,7 @@ import com.sample.sayan.exoplayersample.R;
 public class GenericExoPlayer {
 
     public static final int PLAYER_TYPE_DEFAULT = 1;
+    public static final int PLAYER_TYPE_HLS = 2;
 
     public static void showMediaDefault(Activity activity, String mediaUrl, int playerType) {
         Intent intent = new Intent(activity, GenericExoPlayerActivity.class);
@@ -46,6 +48,9 @@ public class GenericExoPlayer {
                 case PLAYER_TYPE_DEFAULT:
                     showDefaultPlayer(playerView, mediaUrl);
                     break;
+                case PLAYER_TYPE_HLS:
+                    showHLSPlayer(playerView, mediaUrl);
+                    break;
                 default:
                     showDefaultPlayer(playerView, mediaUrl);
                     break;
@@ -54,11 +59,9 @@ public class GenericExoPlayer {
 //        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"),
 //                mediaDataSourceFactory, extractorsFactory, null, null);
 //
-//        MediaSource mediaSource = new HlsMediaSource(Uri.parse("https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"),
-//                mediaDataSourceFactory,null, null);
         }
 
-        private void showDefaultPlayer(SimpleExoPlayerView playerView, String mediaUrl){
+        private void showDefaultPlayer(SimpleExoPlayerView playerView, String mediaUrl) {
             SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter())));
             playerView.requestFocus();
             playerView.setPlayer(player);
@@ -69,6 +72,21 @@ public class GenericExoPlayer {
 
             MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(mediaUrl),
                     mediaDataSourceFactory, extractorsFactory, null, null);
+
+            player.prepare(mediaSource);
+        }
+
+        private void showHLSPlayer(SimpleExoPlayerView playerView, String mediaUrl) {
+            SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter())));
+            playerView.requestFocus();
+            playerView.setPlayer(player);
+
+            DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+            DefaultDataSourceFactory mediaDataSourceFactory = new DefaultDataSourceFactory(this, Util.getUserAgent(this, "exoPlayerSample"), (TransferListener<? super DataSource>) bandwidthMeter);
+            DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+
+            MediaSource mediaSource = new HlsMediaSource(Uri.parse(mediaUrl),
+                    mediaDataSourceFactory, null, null);
 
             player.prepare(mediaSource);
         }
