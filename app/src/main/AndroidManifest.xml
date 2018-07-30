@@ -18,7 +18,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".exoplayer.GenericExoPlayer$GenericExoPlayerActivity"
-            android:screenOrientation="landscape"
+            android:configChanges="orientation|screenSize|layoutDirection"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen"
             />
     </application>

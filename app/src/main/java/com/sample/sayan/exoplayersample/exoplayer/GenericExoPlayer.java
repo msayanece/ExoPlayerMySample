@@ -2,11 +2,14 @@ package com.sample.sayan.exoplayersample.exoplayer;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -197,5 +200,25 @@ public class GenericExoPlayer {
             initializePlayer();
             super.onResume();
         }
+
+//        @Override
+//        public void onConfigurationChanged(Configuration newConfig) {
+//            super.onConfigurationChanged(newConfig);
+//            contentPosition = player.getContentPosition();
+//            // Checking the orientation of the screen
+//            if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+//                //First Hide other objects (listview or recyclerview), better hide them using Gone.
+//                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) playerView.getLayoutParams();
+//                params.width=params.MATCH_PARENT;
+//                params.height=params.MATCH_PARENT;
+//                playerView.setLayoutParams(params);
+//            } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT){
+//                //unhide your objects here.
+//                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) playerView.getLayoutParams();
+//                params.width=params.MATCH_PARENT;
+//                params.height=params.WRAP_CONTENT;
+//                playerView.setLayoutParams(params);
+//            }
+//        }
     }
 }
