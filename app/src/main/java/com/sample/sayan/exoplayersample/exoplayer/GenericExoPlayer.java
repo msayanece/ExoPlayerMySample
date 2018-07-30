@@ -37,13 +37,26 @@ public class GenericExoPlayer {
 
     public static class GenericExoPlayerActivity extends AppCompatActivity {
 
+        private SimpleExoPlayer player;
+        private String mediaUrl;
+        private int type;
+        private SimpleExoPlayerView playerView;
+        private long contentPosition;
+
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_generic_exo_player);
-            SimpleExoPlayerView playerView = findViewById(R.id.playerView);
-            int type = getIntent().getIntExtra("type", 1);
-            String mediaUrl = getIntent().getStringExtra("mediaUrl");
+            playerView = findViewById(R.id.playerView);
+            type = getIntent().getIntExtra("type", 1);
+            mediaUrl = getIntent().getStringExtra("mediaUrl");
+            initializePlayer();
+//        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"),
+//                mediaDataSourceFactory, extractorsFactory, null, null);
+//
+        }
+
+        private void initializePlayer(){
             switch (type) {
                 case PLAYER_TYPE_DEFAULT:
                     showDefaultPlayer(playerView, mediaUrl);
@@ -55,14 +68,10 @@ public class GenericExoPlayer {
                     showDefaultPlayer(playerView, mediaUrl);
                     break;
             }
-
-//        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"),
-//                mediaDataSourceFactory, extractorsFactory, null, null);
-//
         }
 
         private void showDefaultPlayer(SimpleExoPlayerView playerView, String mediaUrl) {
-            SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter())));
+            player = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter())));
             playerView.requestFocus();
             playerView.setPlayer(player);
 
@@ -74,10 +83,13 @@ public class GenericExoPlayer {
                     mediaDataSourceFactory, extractorsFactory, null, null);
 
             player.prepare(mediaSource);
+            if (contentPosition != 0){
+                player.seekTo(contentPosition);
+            }
         }
 
         private void showHLSPlayer(SimpleExoPlayerView playerView, String mediaUrl) {
-            SimpleExoPlayer player = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter())));
+            player = ExoPlayerFactory.newSimpleInstance(this, new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter())));
             playerView.requestFocus();
             playerView.setPlayer(player);
 
@@ -89,6 +101,22 @@ public class GenericExoPlayer {
                     mediaDataSourceFactory, null, null);
 
             player.prepare(mediaSource);
+            if (contentPosition != 0){
+                player.seekTo(contentPosition);
+            }
+        }
+
+        @Override
+        protected void onPause() {
+            super.onPause();
+            contentPosition = player.getContentPosition();
+            player.release();
+        }
+
+        @Override
+        protected void onResume() {
+            initializePlayer();
+            super.onResume();
         }
     }
 }
