@@ -39,12 +39,163 @@ public class GenericExoPlayer {
 
     public static final int PLAYER_TYPE_DEFAULT = 1;
     public static final int PLAYER_TYPE_HLS = 2;
+    private SimpleExoPlayer player;
+    private Activity activity;
+    private String mediaUrl;
+    private int playerType;
+    private SimpleExoPlayerView simpleExoPlayerView;
+    private ProgressBar progressBar;
+    private long contentPosition;
+
+    private GenericExoPlayer(Activity activity, String mediaUrl, int playerType, SimpleExoPlayerView simpleExoPlayerView, ProgressBar progressBar) {
+        this.activity = activity;
+        this.mediaUrl = mediaUrl;
+        this.playerType = playerType;
+        this.simpleExoPlayerView = simpleExoPlayerView;
+        this.progressBar = progressBar;
+        initializePlayer();
+    }
 
     public static void showMediaDefault(Activity activity, String mediaUrl, int playerType) {
         Intent intent = new Intent(activity, GenericExoPlayerActivity.class);
         intent.putExtra("type", playerType);
         intent.putExtra("mediaUrl", mediaUrl);
         activity.startActivity(intent);
+    }
+
+    public static GenericExoPlayer createVideoPlayerDefault(Activity activity, String mediaUrl, int playerType, SimpleExoPlayerView simpleExoPlayerView, ProgressBar progressBar) {
+        return new GenericExoPlayer(activity, mediaUrl, playerType, simpleExoPlayerView, progressBar);
+    }
+
+    private void initializePlayer() {
+        switch (playerType) {
+            case PLAYER_TYPE_DEFAULT:
+                showDefaultPlayer(activity, mediaUrl);
+                break;
+            case PLAYER_TYPE_HLS:
+                showHLSPlayer(activity, mediaUrl);
+                break;
+            default:
+                showDefaultPlayer(activity, mediaUrl);
+                break;
+        }
+        addListenerToExoplayer();
+    }
+
+    private void addListenerToExoplayer() {
+        player.addListener(new Player.EventListener() {
+            @Override
+            public void onTimelineChanged(Timeline timeline, Object manifest, int reason) {
+
+            }
+
+            @Override
+            public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
+
+            }
+
+            @Override
+            public void onLoadingChanged(boolean isLoading) {
+
+            }
+
+            @Override
+            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+                switch (playbackState) {
+                    case ExoPlayer.STATE_IDLE:
+                        if (progressBar != null)
+                            progressBar.setVisibility(View.INVISIBLE);
+                        break;
+                    case ExoPlayer.STATE_BUFFERING:
+                        if (progressBar != null)
+                            progressBar.setVisibility(View.VISIBLE);
+                        break;
+                    case ExoPlayer.STATE_READY:
+                        if (progressBar != null)
+                            progressBar.setVisibility(View.INVISIBLE);
+                        break;
+                    case ExoPlayer.STATE_ENDED:
+                        if (progressBar != null)
+                            progressBar.setVisibility(View.INVISIBLE);
+                        break;
+                }
+            }
+
+            @Override
+            public void onRepeatModeChanged(int repeatMode) {
+
+            }
+
+            @Override
+            public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
+
+            }
+
+            @Override
+            public void onPlayerError(ExoPlaybackException error) {
+
+            }
+
+            @Override
+            public void onPositionDiscontinuity(int reason) {
+
+            }
+
+            @Override
+            public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
+
+            }
+
+            @Override
+            public void onSeekProcessed() {
+
+            }
+        });
+    }
+
+    private void showDefaultPlayer(Activity activity, String mediaUrl) {
+        player = ExoPlayerFactory.newSimpleInstance(activity, new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter())));
+        simpleExoPlayerView.requestFocus();
+        simpleExoPlayerView.setPlayer(player);
+
+        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        DefaultDataSourceFactory mediaDataSourceFactory = new DefaultDataSourceFactory(activity, Util.getUserAgent(activity, "exoPlayerSample"), (TransferListener<? super DataSource>) bandwidthMeter);
+        DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+
+        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse(mediaUrl),
+                mediaDataSourceFactory, extractorsFactory, null, null);
+
+        player.prepare(mediaSource);
+        if (contentPosition != 0) {
+            player.seekTo(contentPosition);
+        }
+    }
+
+    private void showHLSPlayer(Activity activity, String mediaUrl) {
+        player = ExoPlayerFactory.newSimpleInstance(activity, new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter())));
+        simpleExoPlayerView.requestFocus();
+        simpleExoPlayerView.setPlayer(player);
+
+        DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
+        DefaultDataSourceFactory mediaDataSourceFactory = new DefaultDataSourceFactory(activity, Util.getUserAgent(activity, "exoPlayerSample"), (TransferListener<? super DataSource>) bandwidthMeter);
+        DefaultExtractorsFactory extractorsFactory = new DefaultExtractorsFactory();
+
+        MediaSource mediaSource = new HlsMediaSource(Uri.parse(mediaUrl),
+                mediaDataSourceFactory, null, null);
+
+        player.prepare(mediaSource);
+        if (contentPosition != 0) {
+            player.seekTo(contentPosition);
+        }
+    }
+
+    public void releasePlayer(){
+        contentPosition = player.getContentPosition();
+        player.release();
+    }
+
+    public void reconnectPlayer(){
+        initializePlayer();
     }
 
     public static class GenericExoPlayerActivity extends AppCompatActivity {
