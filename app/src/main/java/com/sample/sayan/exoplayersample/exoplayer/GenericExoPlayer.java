@@ -155,7 +155,7 @@ public class GenericExoPlayer {
 
     private void showDefaultPlayer(Activity activity, String mediaUrl) {
         player = ExoPlayerFactory.newSimpleInstance(activity, new DefaultTrackSelector(new AdaptiveTrackSelection.Factory(new DefaultBandwidthMeter())));
-        simpleExoPlayerView.requestFocus();
+//        simpleExoPlayerView.requestFocus();
         simpleExoPlayerView.setPlayer(player);
 
         DefaultBandwidthMeter bandwidthMeter = new DefaultBandwidthMeter();
