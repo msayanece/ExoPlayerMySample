@@ -66,11 +66,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void openFullscreenDialog() {
 
-        ((ViewGroup) mExoPlayerView.getParent()).removeView(mExoPlayerView);
-        mFullScreenDialog.addContentView(mExoPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fullscreen_skrink));
-        mExoPlayerFullscreen = true;
-        mFullScreenDialog.show();
+//        ((ViewGroup) mExoPlayerView.getParent()).removeView(mExoPlayerView);
+//        mFullScreenDialog.addContentView(mExoPlayerView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+//        mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(MainActivity.this, R.drawable.ic_fullscreen_skrink));
+//        mExoPlayerFullscreen = true;
+//        mFullScreenDialog.show();
+        GenericExoPlayer.showMediaDefault(this, URL_MP4, GenericExoPlayer.PLAYER_TYPE_DEFAULT, true);
     }
 
     private void closeFullscreenDialog() {

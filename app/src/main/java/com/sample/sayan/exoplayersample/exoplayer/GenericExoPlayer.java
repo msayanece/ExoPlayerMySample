@@ -7,9 +7,12 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -27,12 +30,14 @@ import com.google.android.exoplayer2.source.hls.HlsMediaSource;
 import com.google.android.exoplayer2.trackselection.AdaptiveTrackSelection;
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionArray;
+import com.google.android.exoplayer2.ui.PlaybackControlView;
 import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultBandwidthMeter;
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory;
 import com.google.android.exoplayer2.upstream.TransferListener;
 import com.google.android.exoplayer2.util.Util;
+import com.sample.sayan.exoplayersample.MainActivity;
 import com.sample.sayan.exoplayersample.R;
 
 public class GenericExoPlayer {
@@ -198,6 +203,14 @@ public class GenericExoPlayer {
         initializePlayer();
     }
 
+    public static void showMediaDefault(Activity activity, String mediaUrl, int playerType, boolean isFullScreen) {
+        Intent intent = new Intent(activity, GenericExoPlayerActivity.class);
+        intent.putExtra("type", playerType);
+        intent.putExtra("mediaUrl", mediaUrl);
+        intent.putExtra("isFullScreen", isFullScreen);
+        activity.startActivity(intent);
+    }
+
     public static class GenericExoPlayerActivity extends AppCompatActivity {
 
         private SimpleExoPlayer player;
@@ -206,6 +219,9 @@ public class GenericExoPlayer {
         private SimpleExoPlayerView playerView;
         private long contentPosition;
         private ProgressBar progressBar;
+        private boolean isFullScreen;
+        private FrameLayout mFullScreenButton;
+        private ImageView mFullScreenIcon;
 
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -215,10 +231,35 @@ public class GenericExoPlayer {
             progressBar = findViewById(R.id.progressBar);
             type = getIntent().getIntExtra("type", 1);
             mediaUrl = getIntent().getStringExtra("mediaUrl");
+            isFullScreen = getIntent().getBooleanExtra("isFullScreen", false);
             initializePlayer();
+            if (isFullScreen){
+                doFullScreenOperation();
+            }
 //        MediaSource mediaSource = new ExtractorMediaSource(Uri.parse("http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4"),
 //                mediaDataSourceFactory, extractorsFactory, null, null);
 //
+        }
+
+        private void doFullScreenOperation() {
+//            ((ViewGroup) playerView.getParent()).removeView(playerView);
+            PlaybackControlView controlView = playerView.findViewById(R.id.exo_controller);
+            mFullScreenButton = controlView.findViewById(R.id.exo_fullscreen_button);
+            mFullScreenButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    closeFullscreen();
+                }
+            });
+            mFullScreenIcon = controlView.findViewById(R.id.exo_fullscreen_icon);
+            mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(GenericExoPlayerActivity.this, R.drawable.ic_fullscreen_skrink));
+        }
+
+        private void closeFullscreen() {
+//            ((ViewGroup) playerView.getParent()).removeView(playerView);
+//            ((FrameLayout) findViewById(R.id.main_media_frame)).addView(playerView);
+            mFullScreenIcon.setImageDrawable(ContextCompat.getDrawable(GenericExoPlayerActivity.this, R.drawable.ic_fullscreen_expand));
+            onBackPressed();
         }
 
         private void initializePlayer() {
